@@ -7,6 +7,28 @@ export function isInDocument(node: Element): boolean {
     return (node === document.body || document.body.contains(node));
 }
 
+export function waitingForAppendToDocument(dom: Element, timeout = 1000): Promise<void> {
+    if (isInDocument(dom)) return Promise.resolve();
+    return new Promise((resolve, reject) => {
+        let timeID, startTime = (new Date()).getTime();
+        const test = (delay = 0) => {
+            clearTimeout(timeID);
+            timeID = setTimeout(() => {
+                if ((new Date()).getTime() - startTime > timeout) {
+                    reject(new Error('Waiting for append to document timeout!'));
+                } else {
+                    if (isInDocument(dom)) {
+                        resolve();
+                    } else {
+                        test(200);
+                    }
+                }
+            }, delay);
+        }
+        test();
+    });
+}
+
 export function createElement(tagName: string, className?: string, style?: CSSStyleSheet, xmlns?: string) {
     const el = xmlns ? (document.createElementNS(xmlns, tagName) as HTMLElement) : document.createElement(tagName);
     className && (el.className = className);
@@ -27,6 +49,11 @@ export function setInnerText(dom, text) {
     } else {
         dom.innerText = text;
     }
+}
+export function appendInnerText(dom, text) {
+    const textNode = document.createTextNode(text);
+    dom.appendChild(textNode);
+    return textNode;
 }
 export function insert(parent: HTMLElement | Node, newDom: HTMLElement | Node) {
     if (parent && newDom) {
@@ -135,6 +162,14 @@ export function removeMe(dom) {
     } else {
         if (dom.parentNode !== null) dom.parentNode.removeChild(dom);
     }
+}
+export function children(dom: HTMLElement): HTMLElement[] {
+    const count = dom ? dom.children.length : 0;
+    const result = [];
+    for (var i: number = 0; i < dom.children.length; i++) {
+        result.push(dom.children.item(i));
+    }
+    return result;
 }
 export function eachChildren(dom: HTMLElement, fn: (el: HTMLElement, index) => void, fromIndex?: number) {
     if (dom) {

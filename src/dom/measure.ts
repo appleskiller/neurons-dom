@@ -1,6 +1,6 @@
 import { isDefined, globalLimitedDictionary } from 'neurons-utils';
 import { parseToCss } from './style';
-import { setInnerText } from './element';
+import { setInnerText, removeMe } from './element';
 
 const textMeasureCache = globalLimitedDictionary<{ width: number, height: number }>('text_measure_cache');
 let scrollbarWidth;
@@ -185,8 +185,55 @@ export function getPixel(value: number | string, size: number, defaultValue?: nu
         }
         if (str.indexOf('%') !== -1) {
             return sign * size * parseFloat(str) / 100;
+        } else if (str.indexOf('mm') !== -1) {
+            return sign * mm2px(parseFloat(str));
+        } else if (str.indexOf('pt') !== -1) {
+            return sign * pt2px(parseFloat(str));
         } else {
             return sign * parseFloat(str);
         }
+    }
+}
+let DPI = null;
+export function getDPI(): { X: number, Y: number } {
+    if (DPI) return DPI;
+    DPI = { X: 0, Y: 0 };
+    if (window.screen && window.screen['deviceXDPI']) {
+        DPI.X = window.screen['deviceXDPI'];
+        DPI.Y = window.screen['deviceYDPI'];
+    } else {
+        const tmpNode = document.createElement("DIV");
+        tmpNode.style.cssText = "width:1in;height:1in;position:absolute;left:0px;top:0px;z-index:99;visibility:hidden";
+        document.body.appendChild(tmpNode);
+        DPI.X = tmpNode.offsetWidth;
+        DPI.Y = tmpNode.offsetHeight;
+        removeMe(tmpNode);
+    }
+    return DPI;
+}
+export function px2mm(value): number {
+    return 25.4 * value / getDPI().X;
+}
+
+export function mm2px(value): number {
+    return getDPI().X * value / 25.4;
+}
+export function pt2px(value): number {
+    return 72 * value / getDPI().X;
+}
+export function px2pt(value): number {
+    return getDPI().X * value / 72;
+}
+
+// A4 (mm); A padding: 48px;
+const paperSize = {
+    'A4': { width: 210, height: 297 }
+};
+
+export function getPaperPixelSize(paper: string = 'A4'): { width: number; height: number; } {
+    const size = paperSize[paper];
+    return {
+        width: parseInt(mm2px(size.width) as any),
+        height: parseInt(mm2px(size.height) as any),
     }
 }
