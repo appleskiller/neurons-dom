@@ -97,11 +97,11 @@ export function insertBefore(newDom: HTMLElement | Node, existingDom: HTMLElemen
 export function insertAfter(newDom: HTMLElement | Node, existingDom: HTMLElement | Node) {
     if (existingDom && newDom && existingDom.parentNode !== null) {
         const parent = existingDom.parentNode;
-        existingDom = nextNode(existingDom);
-        if (existingDom) {
-            parent.insertBefore(newDom, existingDom);
-        } else {
+        if (existingDom === parent.childNodes.item(parent.childNodes.length - 1)) {
             parent.appendChild(newDom);
+        } else {
+            existingDom = nextNode(existingDom);
+            existingDom && parent.insertBefore(newDom, existingDom);
         }
     }
 }
