@@ -1,5 +1,5 @@
 import { isBrowser } from 'neurons-utils';
-import { appendCSSTag } from './style';
+import { appendCSSTag, CSSStyleSheet } from './style';
 
 export function isInDocument(node: Element): boolean {
     if (!isBrowser || !document) return true;
