@@ -82,7 +82,7 @@ export const fullscreen = {
     supported: function () {
         return !isEmpty(api) && !!document[api.fullscreenEnabled];
     },
-    request: function (elem?) {
+    request: function (elem?): Promise<void> {
         return new Promise((resolve) => {
             const request = api.requestFullscreen;
             const onFullScreenEntered = () => {
@@ -98,7 +98,7 @@ export const fullscreen = {
             fullscreen.on('change', onFullScreenEntered);
         });
     },
-    exit: function () {
+    exit: function (): Promise<void> {
         return new Promise((resolve) => {
             if (!fullscreen.isFullscreen()) {
                 resolve();
@@ -113,7 +113,7 @@ export const fullscreen = {
             fullscreen.on('change', onFullScreenExit);
         });
     },
-    toggle: function (elem?) {
+    toggle: function (elem?): Promise<void> {
         return fullscreen.isFullscreen() ? fullscreen.exit() : fullscreen.request(elem);
     },
     onchange: function (callback) {
