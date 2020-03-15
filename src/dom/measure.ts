@@ -218,10 +218,10 @@ export function px2mm(value): number {
 export function mm2px(value): number {
     return getDPI().X * value / 25.4;
 }
-export function pt2px(value): number {
+export function px2pt(value): number {
     return 72 * value / getDPI().X;
 }
-export function px2pt(value): number {
+export function pt2px(value): number {
     return getDPI().X * value / 72;
 }
 
