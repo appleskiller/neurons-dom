@@ -227,7 +227,11 @@ export function pt2px(value): number {
 
 // A4 (mm); A padding: 48px;
 const paperSize = {
-    'A4': { width: 210, height: 297 }
+    'A0': { width: 841, height: 1189 },
+    'A1': { width: 594, height: 841 },
+    'A2': { width: 420, height: 594 },
+    'A3': { width: 297, height: 420 },
+    'A4': { width: 210, height: 297 },
 };
 
 export function getPaperPixelSize(paper: string = 'A4'): { width: number; height: number; } {
