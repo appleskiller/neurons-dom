@@ -169,7 +169,10 @@ export function measureText(str, css, className?) {
 export function getPixel(value: number | string, size: number, defaultValue?: number | string): number {
     if (!isDefined(value) && !isDefined(defaultValue)) return NaN;
     let valueType = typeof value;
-    if (value === '' || (valueType === 'number' && isNaN(value as number))) {
+    if (!isDefined(value) && isDefined(defaultValue)) {
+        value = defaultValue;
+        valueType = typeof value;
+    } else if (value === '' || (valueType === 'number' && isNaN(value as number))) {
         if (!isDefined(defaultValue)) return NaN;
         value = defaultValue;
         valueType = typeof value;
