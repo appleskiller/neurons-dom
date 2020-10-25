@@ -1,4 +1,4 @@
-import { scriptLoader, fontLoader } from './loader';
+import { scriptLoader, fontLoader, cssLoader } from './loader';
 
 export {
     parseToClassMap,
@@ -108,6 +108,7 @@ export {
     fontLoader,
     ScriptLoader,
     scriptLoader,
+    cssLoader,
 } from './loader';
 
 const escapeRegExp = /[\"\'\&\<\>]/;
@@ -142,6 +143,9 @@ export function escape(v: string): string {
 
 export function loadScript(url: string): Promise<void> {
     return scriptLoader.load(url);
+}
+export function loadCSS(url: string): Promise<void> {
+    return cssLoader.load(url);
 }
 export function loadFonts(...names): Promise<any> {
     return Promise.all(names.map(name => fontLoader.load(name)));

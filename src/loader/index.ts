@@ -11,6 +11,7 @@ export interface IScriptCatch {
 }
 
 const scriptLoaderCache: IScriptCatch = globalCache('scriptLoaderCache');
+const cssLoaderCache: IScriptCatch = globalCache('cssLoaderCache');
 const fontLoaderCache = globalCache('fontLoaderCache');
 
 // ---------------------------------------------------------------------------------
@@ -238,6 +239,83 @@ export class ScriptLoader {
 }
 
 export const scriptLoader = new ScriptLoader();
+
+// ---------------------------------------------------------------------------------
+//
+// Script Loader
+//
+// =================================================================================
+export class CSSLoader {
+    load(url: string): Promise<void> {
+        return new Promise((resolve, reject) => {
+            if (!url) {
+                resolve();
+            } else {
+                url = this._getUrl(url);
+                if (cssLoaderCache[url] === true) {
+                    resolve();
+                } else if (cssLoaderCache[url]) {
+                    (<IDeferred[]>cssLoaderCache[url]).push({
+                        resolve: resolve,
+                        reject: reject
+                    });
+                } else if (this._findByUrl(url)) {
+                    cssLoaderCache[url] = true;
+                    resolve();
+                } else {
+                    cssLoaderCache[url] = [{
+                        resolve: resolve,
+                        reject: reject
+                    }];
+                    const link = document.createElement('link');
+                    link.onload = () => {
+                        link.onload = null;
+                        link.onerror = null;
+                        this._loaded(url);
+                    };
+                    link.onerror = (err) => {
+                        link.onload = null;
+                        link.onerror = null;
+                        if (link.parentNode) {
+                            removeMe(link);
+                        }
+                        this._error(url, err);
+                    };
+                    link.setAttribute('rel', 'stylesheet');
+                    link.setAttribute('type', 'text/css');
+                    link.setAttribute('href', url);
+                    document.head.appendChild(link);
+                }
+            }
+        })
+    }
+    private _error(url, err) {
+        const defers = cssLoaderCache[url];
+        delete cssLoaderCache[url];
+        if (defers && defers !== true) {
+            for (let i = 0; i < defers.length; i++) {
+                defers[i].reject(err);
+            }
+        }
+    }
+    private _loaded(url) {
+        const defers = cssLoaderCache[url];
+        cssLoaderCache[url] = true;
+        if (defers && defers !== true) {
+            for (let i = 0; i < defers.length; i++) {
+                defers[i].resolve();
+            }
+        }
+    }
+    private _getUrl(url): string {
+        return url;
+    }
+    private _findByUrl(url: string): boolean {
+        return !!document.querySelector(`link[href='${url}']`);
+    }
+}
+
+export const cssLoader = new CSSLoader();
 
 // ---------------------------------------------------------------------------------
 //
