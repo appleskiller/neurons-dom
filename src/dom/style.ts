@@ -58,10 +58,6 @@ export function value2CssValue(prop, value) {
     return value2css[prop] ? value2css[prop](value) : value;
 }
 
-export function composeCSSFont(fontFamily: string, fontSize: number, fontWeight: string, fontStyle: string) {
-    return `${fontStyle || ''} ${fontWeight || ''} ${fontSize || 0}px ${fontFamily || ''}`;
-}
-
 export function parseToStylesheet(obj) {
     obj = obj || {};
     return Object.keys(obj).reduce((p, key) => {
@@ -122,4 +118,124 @@ export function replaceCSSString(styleDom, sheets: IHTMLWidgetStyleSheet[], name
         }).join('\n');
     }).join('\n');
     styleDom.innerHTML = content;
+}
+
+export function composeCSSFont(fontFamily: string, fontSize: number, fontWeight: string, fontStyle: string) {
+    return `${fontStyle || ''} ${fontWeight || ''} ${fontSize || 0}px ${fontFamily || ''}`;
+}
+
+export interface ITextFontStyle {
+    fontFamily?: string,
+    fontSize?: string,
+    fontWeight?: string,
+    fontStyle?: string,
+    'font-family'?: string,
+    'font-size'?: string,
+    'font-weight'?: string,
+    'font-style'?: string,
+}
+const fontProperties = ['Style', 'Variant', 'Weight', 'Size', 'Family'];
+const fontCSSProperties = ['style', 'variant', 'weight', 'size', 'family'];
+const resolution = isBrowser ? (window.devicePixelRatio || 1) : 1;
+export function getFontSize(style: ITextFontStyle) {
+    const size = parseFloat(style.fontSize);
+    return isNaN(size) ? 12 : size;
+}
+export function composeFontString(style: ITextFontStyle) {
+    style = style || {};
+    let bits = [],
+        size = 0,
+        key, v;
+    for (let i=0; i<fontProperties.length; ++i) {
+        key = fontProperties[i];
+        const pk = 'font' + key, ck = 'font-' + fontCSSProperties[i];
+        v = pk in style ? style[pk] : ck in style ? style[ck] : null;
+        if (v) {
+            if (key === 'Size') {
+                size = parseFloat(v);
+                size = isNaN(size) ? 12 : size;
+                v = size + 'px';
+            }
+            bits.push(v);
+        }
+    }
+    if (size) {
+        return bits.join(' ');
+    }
+    return '';
+}
+export interface IBorderStyle {
+    borderStyle?: string,
+    borderWidth?: string,
+    borderColor?: string,
+    'border-style'?: string,
+    'border-width'?: string,
+    'border-color'?: string,
+}
+const borderProperties = ['Style', 'Width', 'Color'];
+const borderCSSProperties = ['style', 'width', 'color'];
+export function composeBorderString(style: IBorderStyle) {
+    style = style || {};
+    let bits = [],
+        width = 0,
+        key, v;
+    for (let i=0; i<borderProperties.length; ++i) {
+        key = borderProperties[i];
+        const pk = 'border' + key, ck = 'border-' + borderCSSProperties[i];
+        v = pk in style ? style[pk] : ck in style ? style[ck] : null;
+        if (v) {
+            if (key === 'Width') {
+                width = parseFloat(v);
+                width = isNaN(width) ? 0 : width;
+                v = width + 'px';
+            }
+            bits.push(v);
+        }
+    }
+    if (width) {
+        return bits.join(' ');
+    }
+    return '';
+}
+
+export interface ITextShadowStyle {
+    textShadowColor?: string,
+    textShadowOffsetX?: number,
+    textShadowOffsetY?: number,
+    textShadowBlur?: number,
+    'text-shadow-color'?: string,
+    'text-shadow-offsetX'?: number,
+    'text-shadow-offsetY'?: number,
+    'text-shadow-blur'?: number,
+}
+const textShadowProperties = ['OffsetX', 'OffsetY', 'Blur', 'Color'];
+const textShadowCSSProperties = ['offsetX', 'offsetY', 'blur', 'color'];
+export function composeTextShadow(style: ITextShadowStyle) {
+    style = style || {};
+    let bits = [], offsetX = 0, offsetY = 0, blur = 0, key, v;
+    for (let i=0; i<textShadowProperties.length; ++i) {
+        key = textShadowProperties[i];
+        const pk = 'textShadow' + key, ck = 'text-shadow-' + textShadowCSSProperties[i];
+        v = pk in style ? style[pk] : ck in style ? style[ck] : null;
+        if (v) {
+            if (key === 'OffsetX') {
+                offsetX = parseFloat(v);
+                offsetX = isNaN(offsetX) ? 0 : offsetX;
+                v = offsetX + 'px';
+            } else if (key === 'OffsetY') {
+                offsetY = parseFloat(v);
+                offsetY = isNaN(offsetY) ? 0 : offsetY;
+                v = offsetY + 'px';
+            } else if (key === 'Blur') {
+                blur = parseFloat(v);
+                blur = isNaN(blur) ? 0 : blur;
+                v = blur + 'px';
+            }
+            bits.push(v);
+        }
+    }
+    if (offsetX || offsetY || blur) {
+        return bits.join(' ');
+    }
+    return '';
 }

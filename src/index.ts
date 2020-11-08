@@ -61,6 +61,8 @@ export {
     MAGIC_NUMBER,
     measureTextHeight,
     measureText,
+    suggestTextSize,
+    positionText,
     getPixel,
     getDPI,
     px2mm,
@@ -94,6 +96,10 @@ export {
     appendCSSTag,
     appendCSSTagOnce,
     replaceCSSString,
+    getFontSize,
+    composeFontString,
+    composeBorderString,
+    composeTextShadow,
 } from './dom/style';
 
 export {

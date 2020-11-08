@@ -1,8 +1,10 @@
-import { isDefined, globalLimitedDictionary } from 'neurons-utils';
+import { isDefined, globalLimitedDictionary, globalContext, isBrowser, layout } from 'neurons-utils';
 import { parseToCss } from './style';
 import { setInnerText, removeMe } from './element';
+import { ITextFontStyle, composeFontString, getFontSize } from './style';
 
 const textMeasureCache = globalLimitedDictionary<{ width: number, height: number }>('text_measure_cache');
+const canvasTextMeasureCache = globalLimitedDictionary<TextMetrics>('char_measure_cache');
 let scrollbarWidth;
 export function getScrollbarWidth() {
     if (isDefined(scrollbarWidth)) {
@@ -166,6 +168,74 @@ export function measureText(str, css, className?) {
     textMeasureCache.set(key, s);
     return s;
 }
+
+let canvasSupported = false;
+try {
+    globalContext.document.createElement("canvas").getContext("2d");
+    canvasSupported = true;
+} catch(error) {
+    canvasSupported = false;
+}
+let canvas: HTMLCanvasElement;
+let context: CanvasRenderingContext2D;
+function measureTextWidth(text, style: ITextFontStyle): number {
+    if (!canvasSupported) return measureText(text, style).width;
+    const font = composeFontString(style);
+    if (!font) return 0;
+    const key = `${text}_${font}`;
+    const cache = canvasTextMeasureCache.get(key);
+    if (cache) return cache.width;
+    if (!canvas) {
+        canvas = globalContext.document.createElement('canvas');
+        context = canvas.getContext('2d')
+    }
+    context.font = font;
+    const measure = context.measureText(text);
+    canvasTextMeasureCache.set(key, measure);
+    return measure.width;
+}
+function measureTextCanvas(text, style: ITextFontStyle): {width: number, height: number} {
+    const width = measureTextWidth(text, style);
+    return {width: width, height: width ? getFontSize(style) : 0};
+}
+
+export function suggestTextSize(text: string, style: any, limit?: number): {text: string, width: number, height: number} {
+    const result = {text: text, width: 0, height: 0};
+    if (!text || (isDefined(limit) && limit <= 0)) return result;
+    const measure = measureTextCanvas(text, style);
+    if (!limit || measure.width <= limit) {
+        return {text: text, width: measure.width, height: measure.height};
+    } else {
+        // 检查截断
+        const length = text.length;
+        const percent = limit / measure.width;
+        const dotMeasure = measureTextCanvas('.', style);
+        const dotSize = dotMeasure.width * 3;
+        let i = Math.ceil(length * percent);
+        let t = text.substring(0, i);
+        let s = measureTextWidth(t, style);
+        while (t && s + dotSize > limit) {
+            i -= 1;
+            t = text.substring(0, i);
+            s = measureTextWidth(t, style);
+        }
+        return {text: `${t}...`, width: s + dotSize, height: measure.height};
+    }
+}
+
+export type Box = {x: number, y: number, width: number ,height: number};
+export type Position = 'top' | 'left' | 'right' | 'bottom' 
+    | 'topLeft' | 'topRight' | 'bottomLeft' | 'bottomRight' 
+    | 'center' | 'inside'
+    | 'insideTop' | 'insideBottom' | 'insideLeft' | 'insideRight' 
+    | 'insideTopLeft' | 'insideTopRight' | 'insideBottomLeft' | 'insideBottomRight';
+export function positionText(text: string, style: any, box: Box, position: Position, distance?: number): {x: number, y: number, width: number, height: number} {
+    const textSize = measureTextCanvas(text, style);
+    const pos = layout.positionToBox(textSize, box, position as any, distance);
+    return {x: pos.x, y: pos.y, width: textSize.width, height: textSize.height};
+}
+
+
 export function getPixel(value: number | string, size: number, defaultValue?: number | string): number {
     if (!isDefined(value) && !isDefined(defaultValue)) return NaN;
     let valueType = typeof value;

@@ -354,3 +354,4 @@ export function replaceCursorText(elem: HTMLInputElement, text: string) {
     const range = getCursorRange(elem);
     replaceCursorTextRange(elem, text, range);
 }
+
