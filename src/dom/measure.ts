@@ -22,6 +22,17 @@ export function getScrollbarWidth() {
     return scrollbarWidth;
 }
 
+export function getMaxWidth(dom: HTMLElement) {
+    if (dom.style.width) return parseInt(dom.style.width);
+    const stl = document.defaultView.getComputedStyle(dom);
+    let maxWidth = stl['maxWidth'];
+    if (maxWidth && maxWidth.indexOf('%') !== -1) {
+        return parseInt(stl['width'], 10);
+    } else {
+        return parseInt(maxWidth, 10);
+    }
+}
+
 export function getMaxHeight(dom: HTMLElement) {
     if (dom.style.height) return parseInt(dom.style.height);
     const stl = document.defaultView.getComputedStyle(dom);
@@ -31,6 +42,25 @@ export function getMaxHeight(dom: HTMLElement) {
     } else {
         return parseInt(maxHeight, 10);
     }
+}
+
+export function getMaxSize(dom: HTMLElement) {
+    if (dom.style.width && dom.style.height) return {maxWidth: dom.style.width, maxHeight: dom.style.height}
+    const stl = document.defaultView.getComputedStyle(dom);
+    const result = {maxWidth: 0, maxHeight: 0};
+    let stlWidth = stl['maxWidth'];
+    if (stlWidth && stlWidth.indexOf('%') !== -1) {
+        result.maxWidth = parseInt(stl['width'], 10);
+    } else {
+        result.maxWidth = parseInt(stlWidth, 10);
+    }
+    let stlHeight = stl['maxHeight'];
+    if (stlHeight && stlHeight.indexOf('%') !== -1) {
+        result.maxHeight = parseInt(stl['height'], 10);
+    } else {
+        result.maxHeight = parseInt(stlHeight, 10);
+    }
+    return result;
 }
 
 export function getClientWidth(dom) {

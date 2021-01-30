@@ -53,7 +53,9 @@ export {
 
 export {
     getScrollbarWidth,
+    getMaxWidth,
     getMaxHeight,
+    getMaxSize,
     getClientWidth,
     getClientHeight,
     getClientSize,
