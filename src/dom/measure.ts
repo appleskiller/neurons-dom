@@ -22,17 +22,9 @@ export function getScrollbarWidth() {
     return scrollbarWidth;
 }
 
-export function getMaxWidth(dom: HTMLElement) {
-    if (dom.style.width) return parseInt(dom.style.width);
-    const stl = document.defaultView.getComputedStyle(dom);
-    let maxWidth = stl['maxWidth'];
-    if (maxWidth && maxWidth.indexOf('%') !== -1) {
-        return parseInt(stl['width'], 10);
-    } else {
-        return parseInt(maxWidth, 10);
-    }
-}
-
+/**
+ * @deprecated
+ */
 export function getMaxHeight(dom: HTMLElement) {
     if (dom.style.height) return parseInt(dom.style.height);
     const stl = document.defaultView.getComputedStyle(dom);
@@ -44,23 +36,28 @@ export function getMaxHeight(dom: HTMLElement) {
     }
 }
 
-export function getMaxSize(dom: HTMLElement) {
-    if (dom.style.width && dom.style.height) return {maxWidth: dom.style.width, maxHeight: dom.style.height}
+export function getSuggestSize(dom: HTMLElement) {
+    let width, height;
+    const clientSize = dom.getBoundingClientRect();
+    // 检查是否设置了最大尺寸
     const stl = document.defaultView.getComputedStyle(dom);
-    const result = {maxWidth: 0, maxHeight: 0};
-    let stlWidth = stl['maxWidth'];
-    if (stlWidth && stlWidth.indexOf('%') !== -1) {
-        result.maxWidth = parseInt(stl['width'], 10);
+    const stlMaxWidth = stl['maxWidth'];
+    const stlMaxHeight = stl['maxHeight'];
+    if (!stlMaxWidth || stlMaxWidth === 'none') {
+        width = clientSize.width || NaN;
+    } else if (stlMaxWidth.indexOf('%') !== -1) {
+        width = clientSize.width;
     } else {
-        result.maxWidth = parseInt(stlWidth, 10);
+        width = clientSize.width || parseInt(stlMaxWidth, 10);
     }
-    let stlHeight = stl['maxHeight'];
-    if (stlHeight && stlHeight.indexOf('%') !== -1) {
-        result.maxHeight = parseInt(stl['height'], 10);
+    if (!stlMaxHeight || stlMaxHeight === 'none') {
+        height = clientSize.height || NaN;
+    } else if (stlMaxHeight.indexOf('%') !== -1) {
+        height = clientSize.height;
     } else {
-        result.maxHeight = parseInt(stlHeight, 10);
+        height = clientSize.height || parseInt(stlMaxHeight, 10);
     }
-    return result;
+    return {width: width, height: height};
 }
 
 export function getClientWidth(dom) {
