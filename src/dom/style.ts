@@ -1,4 +1,6 @@
-import { isBrowser } from 'neurons-utils';
+import { globalCache, isBrowser } from 'neurons-utils';
+
+const appendedCSSTags = globalCache('appended_css_tags', {});
 
 export type CSSStyleSheet = CSSStyleDeclaration | { [key: string]: any };
 
@@ -93,10 +95,10 @@ export function appendCSSTag(cssText, params?) {
         document.head.appendChild(dom);
     }
 }
-const appended = {};
+
 export function appendCSSTagOnce(id, cssText, params?) {
-    if (appended[id]) return;
-    appended[id] = true;
+    if (appendedCSSTags[id]) return;
+    appendedCSSTags[id] = true;
     appendCSSTag(cssText, params);
 }
 

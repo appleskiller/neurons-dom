@@ -12,7 +12,7 @@ export function getClipboardData(event: ClipboardEvent): Promise<any> {
             return new Promise((resolve, reject) => {
                 item.getAsString((s) => {
                     result['text'] = s;
-                    resolve();
+                    resolve(null);
                 });
             });
         }
@@ -20,7 +20,7 @@ export function getClipboardData(event: ClipboardEvent): Promise<any> {
             return new Promise((resolve, reject) => {
                 item.getAsString((s) => {
                     result['html'] = s;
-                    resolve();
+                    resolve(null);
                 });
             });
         }
