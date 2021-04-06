@@ -12,10 +12,11 @@ export function addClass(el: HTMLElement, className: string) {
     if (!el || el.nodeType !== 1 || !className) return;
     const classNames = className.match(/[^\x20\t\r\n\f]+/g);
     if (!classNames || !classNames.length) return;
-    if (!el.className) {
+    const elClassName = el.getAttribute("class");
+    if (!elClassName) {
         el.setAttribute('class', className);
     } else {
-        let elClass = ' ' + el.className + ' ';
+        let elClass = ' ' + elClassName + ' ';
         for (let i = 0; i < classNames.length; i++) {
             if (elClass.indexOf(' ' + classNames[i] + ' ') === -1) {
                 elClass += classNames[i] + ' ';
@@ -26,13 +27,14 @@ export function addClass(el: HTMLElement, className: string) {
 }
 export function removeClass(el: HTMLElement, className: string) {
     if (!el || el.nodeType !== 1) return;
-    if (!el.className) return;
+    const elClassName = el.getAttribute("class");
+    if (!elClassName) return;
     className = className || '';
     const classNames = className.match(/[^\x20\t\r\n\f]+/g);
     if (!classNames || !classNames.length) {
         el.setAttribute('class', '');
     } else {
-        let elClass = ' ' + el.className + ' ';
+        let elClass = ' ' + elClassName + ' ';
         for (let i = 0; i < classNames.length; i++) {
             elClass = elClass.replace(' ' + classNames[i] + ' ', ' ');
         }
@@ -42,13 +44,14 @@ export function removeClass(el: HTMLElement, className: string) {
 
 export function hasClass(el: HTMLElement, className: string): boolean {
     if (!el || el.nodeType !== 1) return false;
-    if (!el.className) return false;
+    const elClassName = el.getAttribute("class");
+    if (!elClassName) return false;
     className = className || '';
     const classNames = className.match(/[^\x20\t\r\n\f]+/g);
     if (!classNames || !classNames.length) {
         return true;
     } else {
-        let elClass = ' ' + el.className + ' ';
+        let elClass = ' ' + elClassName + ' ';
         return classNames.every(name => elClass.indexOf(' ' + name + ' ') !== -1);
     }
 }
