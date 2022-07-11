@@ -28,7 +28,7 @@ const defaultOptions = {
     tolerance: 2, // px
     delay: 100,
     glyphs: '',
-    timeout: 5000,
+    timeout: 10000,
     weight: '400', // normal
     style: 'normal',
 };
@@ -83,7 +83,7 @@ class FontFaceChecker {
                     resolve();
                 } else if (FontFaceChecker.isTimeout(startTime)) {
                     removeMe(checkerDom);
-                    reject();
+                    reject(new Error('字体加载超时'));
                 } else {
                     setTimeout(checkDimensions, defaultOptions.delay);
                 }
