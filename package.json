@@ -1,6 +1,6 @@
 {
   "name": "neurons-dom",
-  "version": "1.0.30",
+  "version": "1.0.31",
   "description": "neurons-dom",
   "author": "appleskiller@163.com",
   "license": "MIT",
@@ -17,7 +17,7 @@
     "release": "node script/release.js"
   },
   "dependencies": {
-    "neurons-utils": "1.0.31"
+    "neurons-utils": "1.0.32"
   },
   "devDependencies": {
     "@types/jasmine": "^3.3.16",
@@ -43,6 +43,7 @@
     "rollup-plugin-node-globals": "^1.4.0",
     "rollup-plugin-node-resolve": "^5.2.0",
     "rollup-plugin-uglify": "^6.0.2",
+    "semver": "^7.3.7",
     "shelljs": "^0.8.3",
     "tslint": "^5.9.1",
     "typescript": "3.5.3",
