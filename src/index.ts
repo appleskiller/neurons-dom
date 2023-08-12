@@ -116,6 +116,7 @@ export {
     ScriptLoader,
     scriptLoader,
     cssLoader,
+    FontFaceManager,
 } from './loader';
 
 const escapeRegExp = /[\"\'\&\<\>]/;

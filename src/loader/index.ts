@@ -1,5 +1,5 @@
 import { globalCache } from 'neurons-utils';
-import { removeMe } from '../dom/element';
+import { createElement, removeMe } from '../dom/element';
 
 export type IDeferred = {
     resolve: () => void;
@@ -28,7 +28,7 @@ const defaultOptions = {
     tolerance: 2, // px
     delay: 100,
     glyphs: '',
-    timeout: 10000,
+    timeout: 5000,
     weight: '400', // normal
     style: 'normal',
 };
@@ -118,6 +118,9 @@ class FontFaceChecker {
 }
 
 export class FontFaceLoader {
+    loadFonts(names: string[]): Promise<any> {
+        return Promise.all(names.map(name => this.load(name)));
+    }
     load(name: string): Promise<void> {
         if (fontLoaderCache[name] === true) {
             return Promise.resolve();
@@ -163,6 +166,113 @@ export class FontFaceLoader {
 }
 
 export const fontLoader = new FontFaceLoader();
+
+// ---------------------------------------------------------------------------------
+//
+// FontFace Manager
+//
+// =================================================================================
+
+export class FontFaceItem {
+    constructor(
+        private _fontFamily: string,
+        private _urls: any[] = [],
+        private _fontWeight = 'normal',
+    ) {
+        this._fontDom = createElement('style');
+        this._fontDom.setAttribute('type', 'text/css');
+        document.head.appendChild(this._fontDom);
+        this._updateFontFace();
+    }
+    get fontFamily(): string {
+        return this._fontFamily;
+    }
+    set fontFamily(value: string) {
+        if (this._fontFamily !== value) {
+            this._fontFamily = value;
+            this._updateFontFace();
+        }
+    }
+    get urls(): any[] {
+        return this._urls;
+    }
+    set urls(value: any[]) {
+        this._urls = value;
+        this._updateFontFace();
+    }
+    get fontWeight(): string {
+        return this._fontWeight;
+    }
+    set fontWeight(value: string) {
+        if (this._fontWeight !== value) {
+            this._fontWeight = value;
+            this._updateFontFace();
+        }
+    }
+    destroy() {
+        this._fontDom.innerHTML = '';
+        removeMe(this._fontDom);
+    }
+    private _fontDom;
+    private _updateFontFace() {
+        this._fontDom.innerHTML = '';
+        if (this._fontFamily && this._urls && this._urls.length) {
+            this._fontDom.innerHTML = `
+@font-face {
+    font-family: "${this._fontFamily}";
+    src: ${this._urls.map(item => {
+        return `url("${item.url}")` + (item.format ? ` format("${item.format}")` : '');
+    }).join(',\n         ')};
+    font-weight: ${this._fontWeight || 'normal'};
+}
+            `;
+        }
+    }
+}
+
+export interface IFontFaceData {
+    fontFamily: string;
+    urls: {
+        url: string,
+        format: string,
+    }[],
+    fontWeight?: string;
+}
+
+export class FontFaceManager {
+    private _fontFaces: FontFaceItem[] = [];
+    static create(): FontFaceManager {
+        return new FontFaceManager();
+    }
+    getFontFaces(): string[] {
+        const fonts = [];
+        const hash = {};
+        this._fontFaces.forEach(item => {
+            const fontFamily = item.fontFamily;
+            if (!hash[fontFamily]) {
+                hash[fontFamily] = true;
+                fonts.push(fontFamily);
+            }
+        });
+        return fonts;
+    }
+    loadFonts(): Promise<void> {
+        const fonts = this.getFontFaces();
+        return fonts.length ? fontLoader.loadFonts(fonts).catch(error => Promise.resolve()) : Promise.resolve();
+    }
+    reset(data: IFontFaceData[]): Promise<void> {
+        this.clear();
+        this._fontFaces = (data || []).map(d => new FontFaceItem(d.fontFamily, d.urls, d.fontWeight));
+        return this.loadFonts();
+    }
+    clear() {
+        this._fontFaces.forEach(item => item.destroy());
+        this._fontFaces = [];
+    }
+    destroy() {
+        this.clear();
+    }
+}
 
 // ---------------------------------------------------------------------------------
 //
