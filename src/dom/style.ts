@@ -1,4 +1,4 @@
-import { globalCache, isBrowser } from 'neurons-utils';
+import { globalCache, isBrowser, isDefined } from 'neurons-utils';
 
 const appendedCSSTags = globalCache('appended_css_tags', {});
 
@@ -185,7 +185,7 @@ export function composeBorderString(style: IBorderStyle) {
         key = borderProperties[i];
         const pk = 'border' + key, ck = 'border-' + borderCSSProperties[i];
         v = pk in style ? style[pk] : ck in style ? style[ck] : null;
-        if (v) {
+        if (isDefined(v)) {
             if (key === 'Width') {
                 width = parseFloat(v);
                 width = isNaN(width) ? 0 : width;
@@ -197,7 +197,7 @@ export function composeBorderString(style: IBorderStyle) {
     if (width) {
         return bits.join(' ');
     }
-    return '';
+    return 'none';
 }
 
 export interface ITextShadowStyle {
